@@ -1,7 +1,9 @@
 """User schemas for request/response validation."""
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
+
+from app.core.validators import validate_password_strength
 
 
 # Authentication Schemas
@@ -37,6 +39,12 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=8, max_length=100)
     full_name: Optional[str] = Field(None, max_length=255)
 
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password meets security requirements."""
+        return validate_password_strength(v)
+
 
 # User Update
 class UserUpdate(BaseModel):
@@ -50,6 +58,12 @@ class PasswordUpdate(BaseModel):
     current_password: str
     new_password: str = Field(..., min_length=8, max_length=100)
 
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password meets security requirements."""
+        return validate_password_strength(v)
+
 
 class PasswordResetRequest(BaseModel):
     """Password reset request."""
@@ -60,6 +74,12 @@ class PasswordReset(BaseModel):
     """Password reset with token."""
     token: str
     new_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password meets security requirements."""
+        return validate_password_strength(v)
 
 
 # Email Verification

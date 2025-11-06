@@ -3,7 +3,8 @@ Application configuration using Pydantic Settings.
 Supports environment-based configuration with validation.
 """
 from typing import Any, Dict, List, Optional
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, RedisDsn, field_validator
+import secrets
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, RedisDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -176,6 +177,26 @@ class Settings(BaseSettings):
     # Testing
     TESTING: bool = False
     TEST_DATABASE_URL: Optional[str] = None
+
+    @model_validator(mode='after')
+    def validate_security_settings(self) -> 'Settings':
+        """Validate security settings for production environments."""
+        # Check SECRET_KEY is not default in production
+        if self.ENVIRONMENT in ["production", "prod"] and not self.TESTING:
+            if self.SECRET_KEY == "CHANGE_THIS_TO_A_SECURE_SECRET_KEY_IN_PRODUCTION":
+                raise ValueError(
+                    "SECRET_KEY must be changed from default value in production. "
+                    "Generate a secure key using: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+                )
+            if len(self.SECRET_KEY) < 32:
+                raise ValueError("SECRET_KEY must be at least 32 characters long for production")
+
+        # Check superuser password is changed in production
+        if self.ENVIRONMENT in ["production", "prod"] and not self.TESTING:
+            if self.FIRST_SUPERUSER_PASSWORD == "changethis":
+                raise ValueError("FIRST_SUPERUSER_PASSWORD must be changed from default value in production")
+
+        return self
 
 
 # Global settings instance

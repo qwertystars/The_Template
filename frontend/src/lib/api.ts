@@ -118,7 +118,7 @@ export interface ApiResponse<T> {
 
 export interface ApiError {
   detail: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -127,12 +127,12 @@ export interface ApiError {
 export async function apiRequest<T>(
   method: 'get' | 'post' | 'put' | 'patch' | 'delete',
   url: string,
-  data?: any,
-  config?: any
+  data?: unknown,
+  config?: Record<string, unknown>
 ): Promise<T> {
   try {
     const response = await api[method](url, data, config)
-    return response.data
+    return response.data as T
   } catch (error) {
     throw new Error(handleApiError(error))
   }

@@ -60,9 +60,10 @@ export function isAuthenticated(): boolean {
 
   try {
     // Check if token is expired
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    const exp = payload.exp * 1000 // Convert to milliseconds
+    const payload = decodeToken(token)
+    if (!payload || !payload.exp) return false
 
+    const exp = payload.exp * 1000 // Convert to milliseconds
     return Date.now() < exp
   } catch {
     return false
@@ -91,11 +92,22 @@ export function setCurrentUser(user: User): void {
 }
 
 /**
+ * JWT token payload interface
+ */
+interface TokenPayload {
+  sub: string
+  exp: number
+  type: string
+  [key: string]: unknown
+}
+
+/**
  * Decode JWT token
  */
-export function decodeToken(token: string): any {
+export function decodeToken(token: string): TokenPayload | null {
   try {
-    return JSON.parse(atob(token.split('.')[1]))
+    const payload = JSON.parse(atob(token.split('.')[1])) as TokenPayload
+    return payload
   } catch {
     return null
   }

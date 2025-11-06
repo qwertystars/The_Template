@@ -90,17 +90,21 @@ make up
 This will start:
 - PostgreSQL on port 5432
 - Redis on port 6379
-- Backend API on port 8000
-- Frontend on port 80
+- Backend API (internal, accessed via Nginx)
+- Frontend + API on port 80 (Nginx reverse proxy)
 - Flower (Celery monitoring) on port 5555
 - Prometheus on port 9090
 - Grafana on port 3000
 
 ### 4. Access the application
 
+**Everything is accessible on port 80:**
 - **Frontend**: http://localhost
-- **API Documentation**: http://localhost:8000/api/docs
-- **API Health**: http://localhost:8000/health
+- **API Documentation**: http://localhost/api/docs
+- **API Health**: http://localhost/api/health
+- **Any API endpoint**: http://localhost/api/v1/...
+
+**Monitoring services:**
 - **Flower**: http://localhost:5555
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
@@ -281,7 +285,7 @@ make shell-db
 ### Example: Login Request
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "http://localhost/api/v1/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=user@example.com&password=yourpassword"
 ```

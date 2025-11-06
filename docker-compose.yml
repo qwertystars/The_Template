@@ -49,11 +49,10 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost
+      - BACKEND_CORS_ORIGINS=http://localhost,http://localhost:80
       - SECRET_KEY=your-secret-key-change-in-production
       - DEBUG=false
-    ports:
-      - "8000:8000"
+    # Backend is not directly exposed - accessed through Nginx on port 80
     depends_on:
       postgres:
         condition: service_healthy

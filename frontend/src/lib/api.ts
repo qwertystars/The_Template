@@ -4,7 +4,9 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use empty string for same-origin requests (Nginx proxies /api to backend)
+// Or specify a full URL for development (e.g., http://localhost:8000)
+const API_URL = import.meta.env.VITE_API_URL || ''
 const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 30000
 
 /**
@@ -59,8 +61,9 @@ api.interceptors.response.use(
           return Promise.reject(error)
         }
 
-        // Try to refresh token
-        const response = await axios.post(`${API_URL}/api/v1/auth/refresh`, {
+        // Try to refresh token (use relative URL if API_URL is empty)
+        const refreshUrl = API_URL ? `${API_URL}/api/v1/auth/refresh` : '/api/v1/auth/refresh'
+        const response = await axios.post(refreshUrl, {
           refresh_token: refreshToken,
         })
 
